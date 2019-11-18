@@ -8,6 +8,13 @@ import random
 total = 0
 yes = 0
 
+num_iters = 1000
+
+count_pi = np.ndarray((1, num_iters))
+count_frame = np.ndarray((1, num_iters))
+
+side = 1.
+
 
 def pythag(x: float, y: float) -> float:
     """
@@ -32,11 +39,41 @@ def evaluate() -> (bool, float, float):
     """
     global yes
     global total
-    rad, x, y = pythag(random.uniform(-1.25, 1.25), random.uniform(-1.25, 1.25))
+    rad, x, y = pythag(random.uniform(-side, side), random.uniform(-side, side))
     if rad <= 1.00000:
         yes += 1
     total += 1
     return rad <= 1.00000, x, y
+
+
+
+
+def difference(frame):
+    global yes
+    global total
+    global count_pi
+    global count_frame
+    for i in range(10):
+        yeah, x, y = evaluate()
+        if yeah:
+            yes += 1
+        total +=1
+    count_pi[0][frame] = ((2 * side)**2) * (yes / total)
+    count_frame[0][frame] = (10 * (frame + 1))
+
+
+def animate2(*args):
+    difference(args[0])
+    print(args[0])
+    # print(args)
+
+    arr = np.ndarray([1, len(count_frame)])
+    arr.fill(math.pi)
+    plt.plot(count_frame, arr[0], 'g')
+    return plt.plot(count_frame, count_pi, 'b')
+
+
+
 
 
 def colordef() -> (str, float, float):
@@ -80,8 +117,11 @@ def animate(*args) -> plt.scatter:
     """
     print(args)
     color, x, y = colordef()
-    plt.title(f"pi = {fix(round(6.25 * (yes/total), 6))}")
+    plt.title(f"pi = {fix(round((2 * side)**2 * (yes/total), 6))}")
     return plt.scatter(x, y, s=15, c=color, alpha=1)
+
+
+# def init2
 
 
 def init(*args) -> plt.scatter:
@@ -115,24 +155,29 @@ def circle(x: float) -> (float, float):
     :rtype: float, float
     """
     y = math.sqrt(1 - (x)**2)
-    y2 = -math.sqrt(1 - (x)**2)
-    return y, y2
+    return y, -y
 
 
+# for i in range(num_iters):
+#     animate2(i)
+#
+# print(count_pi[0][-1])
+
+# quit()
 if __name__ == "__main__":
 
     # Creates the writer
     Writer = animation.writers['ffmpeg']
-    writer = Writer(fps=15, metadata=dict(artist='Me'), bitrate=1800)
+    writer = Writer(fps=60, metadata=dict(artist='Me'), bitrate=1800)
 
     # Makes the figure
     fig, _ = plt.subplots()
 
     # This animates by calling `animate()` 1000 times
-    ani = FuncAnimation(fig, animate, frames=1000, repeat=False, interval=.01, init_func=init)
+    ani = FuncAnimation(fig, animate2, frames=num_iters, repeat=False, interval=.01)#, init_func=init)
 
     plt.show()  # comment out to hide the animation as its being created
-    # ani.save('cool.mp4', writer)  # <--- uncomment to save the animation
+    # ani.save('over_time.mp4', writer)  # <--- uncomment to save the animation
 
 
 
